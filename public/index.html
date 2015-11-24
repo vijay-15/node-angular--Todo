@@ -1,0 +1,80 @@
+<html>
+<head>
+	<title>Todo Demo</title>
+	<script src="angular.min.js"></script>
+	<style type="text/css">
+
+		.red {
+			color: red;
+		}
+	
+	</style>
+</head>
+<body ng-app="todo">
+	<div ng-controller="todoCtrl" ng-init="loadData()">
+		<input type="text" ng-model="myTodo" placeholder="Enter your TODO"> 
+		<input type="button" ng-click="postToDo()" value="ADD">
+		<div  ng-repeat="d in data">
+			<input type="checkbox" ng-click="toggle(d.id)" ng-checked="d.status == 'DONE'">				
+				{{d.data}}
+			<br>
+		</div>
+		
+	</div>
+	
+</body>
+
+<script type="text/javascript">
+
+	var API = "http://localhost:3000"
+	
+	var todo = angular.module('todo', []);
+
+	todo.controller('todoCtrl', function($http, $scope) {
+
+		$scope.data = [];
+
+		$scope.myTodo = "";
+
+		$scope.toggle = function(_id) {
+			console.log("TOGGLED ID:"+ _id)
+			$http({
+				method: "PUT",
+				url   : API + "/update?id="+ _id
+			})
+			.success(function(response) {
+				$scope.data = response;
+			})
+		}
+
+		$scope.postToDo = function() {
+			console.log("SENDING TODO");
+
+			$http({
+				method: "POST",
+				url   : API + "/new?todo="+ $scope.myTodo
+			})
+
+			.success(function(response){
+				$scope.data = response;
+				$scope.myTodo = "";
+			})
+
+		}
+
+		$scope.loadData = function () {
+			console.log("LOADING DATA");
+			$http({
+				method: "GET",
+				url   : API + "/getData"
+			})
+
+			.success(function(response){
+				$scope.data = response;
+			})
+		}
+
+	})
+
+</script>
+</html>
